@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>RGB Calculator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080808;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .calc {
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      border: 1px solid #333;
+      border-radius: 24px;
+      padding: 24px;
+      width: 340px;
+      box-shadow: 0 0 30px #0005;
+      animation: rgbBorder 3s linear infinite;
+    }
+
+    @keyframes rgbBorder {
+      0%   { box-shadow: 0 0 30px #ff000044, 0 0 60px #ff000022; border-color: #ff0000aa; }
+      33%  { box-shadow: 0 0 30px #00ff0044, 0 0 60px #00ff0022; border-color: #00ff00aa; }
+      66%  { box-shadow: 0 0 30px #0000ff44, 0 0 60px #0000ff22; border-color: #0066ffaa; }
+      100% { box-shadow: 0 0 30px #ff000044, 0 0 60px #ff000022; border-color: #ff0000aa; }
+    }
+
+    .display-wrap {
+      background: #0a0a1a;
+      border: 1px solid #ffffff22;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+    }
+
+    #prev-display {
+      color: #ffffff44;
+      font-size: 13px;
+      min-height: 18px;
+      margin-bottom: 4px;
+    }
+
+    #display {
+      color: white;
+      font-size: 40px;
+      font-weight: 300;
+      word-break: break-all;
+      animation: rgbText 3s linear infinite;
+    }
+
+    @keyframes rgbText {
+      0%   { text-shadow: 0 0 20px #ff0000; color: #ff6666; }
+      33%  { text-shadow: 0 0 20px #00ff00; color: #66ff66; }
+      66%  { text-shadow: 0 0 20px #0066ff; color: #66aaff; }
+      100% { text-shadow: 0 0 20px #ff0000; color: #ff6666; }
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ffffff22;
+      background: #ffffff0d;
+      color: #ffffff88;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: #ffffff22;
+      color: white;
+      border-color: #ffffff44;
+    }
+
+    .buttons {
+      display: grid;
+      gap: 8px;
+    }
+
+    .basic-grid { grid-template-columns: repeat(4, 1fr); }
+    .sci-grid   { grid-template-columns: repeat(5, 1fr); }
+
+    button {
+      background: #ffffff0d;
+      color: #ffffffcc;
+      border: 1px solid #ffffff11;
+      border-radius: 10px;
+      font-size: 16px;
+      padding: 14px 8px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    button:hover {
+      background: #ffffff1a;
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    button:active, button.pressed {
+      transform: scale(0.93);
+      background: #ffffff33;
+    }
+
+    button.op   { color: #66aaff; background: #66aaff11; border-color: #66aaff33; }
+    button.sci  { color: #ff66aa; background: #ff66aa11; border-color: #ff66aa33; font-size: 13px; }
+    button.clear { color: #ff6666; background: #ff666611; border-color: #ff666633; }
+
+    button.eq {
+      background: linear-gradient(135deg, #ff0066, #6600ff);
+      color: white;
+      font-weight: bold;
+      border: none;
+      box-shadow: 0 0 20px #ff006644;
+      animation: rgbBtn 3s linear infinite;
+    }
+
+    @keyframes rgbBtn {
+      0%   { background: linear-gradient(135deg, #ff0000, #ff6600); box-shadow: 0 0 20px #ff000066; }
+      33%  { background: linear-gradient(135deg, #00cc00, #0066ff); box-shadow: 0 0 20px #00ff0066; }
+      66%  { background: linear-gradient(135deg, #0066ff, #cc00ff); box-shadow: 0 0 20px #0066ff66; }
+      100% { background: linear-gradient(135deg, #ff0000, #ff6600); box-shadow: 0 0 20px #ff000066; }
+    }
+
+    button.zero { grid-column: span 2; }
+
+    /* History */
+    .history {
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      border: 1px solid #ffffff11;
+      border-radius: 16px;
+      padding: 16px;
+      width: 200px;
+      max-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history h3 {
+      color: #ffffff88;
+      font-size: 13px;
+      margin-bottom: 10px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-thumb { background: #ffffff22; border-radius: 4px; }
+
+    .history-item {
+      background: #ffffff08;
+      border: 1px solid #ffffff11;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 12px;
+      color: #ffffff88;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .history-item:hover { background: #ffffff15; color: white; }
+    .history-item .result { color: white; font-size: 14px; font-weight: bold; }
+
+    .clear-history {
+      margin-top: 10px;
+      padding: 6px;
+      background: #ff666611;
+      border: 1px solid #ff666633;
+      border-radius: 8px;
+      color: #ff6666;
+      font-size: 12px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.15s;
+    }
+
+    .clear-history:hover { background: #ff666622; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- เครื่องคิดเลข -->
+  <div class="calc">
+    <div class="display-wrap">
+      <div id="prev-display"></div>
+      <div id="display">0</div>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('basic')">ทั่วไป</button>
+      <button class="mode-btn" onclick="setMode('sci')">วิทยาศาสตร์</button>
+    </div>
+
+    <div class="buttons basic-grid" id="btn-grid"></div>
+  </div>
+
+  <!-- ประวัติ -->
+  <div class="history">
+    <h3>📋 ประวัติ</h3>
+    <div class="history-list" id="history-list"></div>
+    <button class="clear-history" onclick="clearHistory()">ล้างประวัติ</button>
+  </div>
+
+</div>
+
+<script>
+  let current = '0', prev = '', op = '', fresh = false;
+  let mode = 'basic';
+  const display = document.getElementById('display');
+  const prevDisplay = document.getElementById('prev-display');
+  const historyList = document.getElementById('history-list');
+  const btnGrid = document.getElementById('btn-grid');
+
+  // เสียง
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  function playSound(freq = 440, dur = 0.08, type = 'sine') {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = freq;
+    o.type = type;
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur);
+  }
+
+  function update() { display.textContent = current; }
+
+  function input(val) {
+    playSound(600, 0.06);
+    if (fresh) { current = '0'; fresh = false; }
+    if (val === '.' && current.includes('.')) return;
+    current = current === '0' && val !== '.' ? val : current + val;
+    update();
+  }
+
+  function setOp(o) {
+    playSound(500, 0.08);
+    prevDisplay.textContent = current + ' ' + o;
+    prev = current; op = o; fresh = true;
+  }
+
+  function calculate() {
+    if (!op || !prev) return;
+    playSound(800, 0.12, 'square');
+    let a = parseFloat(prev), b = parseFloat(current), result;
+    if (op === '+') result = a + b;
+    if (op === '-') result = a - b;
+    if (op === '*') result = a * b;
+    if (op === '/') result = b !== 0 ? a / b : 'Error';
+    const expr = prev + ' ' + op + ' ' + current;
+    prevDisplay.textContent = expr + ' =';
+    current = String(parseFloat(result.toFixed(10)));
+    addHistory(expr, current);
+    op = ''; prev = ''; fresh = true;
+    update();
+  }
+
+  function sciCalc(fn) {
+    playSound(700, 0.08);
+    let val = parseFloat(current);
+    let result;
+    if (fn === 'sin') result = Math.sin(val * Math.PI / 180);
+    if (fn === 'cos') result = Math.cos(val * Math.PI / 180);
+    if (fn === 'tan') result = Math.tan(val * Math.PI / 180);
+    if (fn === 'sqrt') result = Math.sqrt(val);
+    if (fn === 'sq') result = val * val;
+    if (fn === 'log') result = Math.log10(val);
+    if (fn === 'ln') result = Math.log(val);
+    if (fn === 'inv') result = 1 / val;
+    if (fn === 'pi') { current = String(Math.PI); update(); return; }
+    if (fn === 'e') { current = String(Math.E); update(); return; }
+    const expr = fn + '(' + current + ')';
+    addHistory(expr, String(parseFloat(result.toFixed(10))));
+    current = String(parseFloat(result.toFixed(10)));
+    fresh = true; update();
+  }
+
+  function clearAll() {
+    playSound(300, 0.1);
+    current = '0'; prev = ''; op = '';
+    prevDisplay.textContent = ''; update();
+  }
+
+  function toggleSign() { current = String(parseFloat(current) * -1); update(); }
+  function percent() { current = String(parseFloat(current) / 100); update(); }
+
+  function addHistory(expr, result) {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `<div>${expr}</div><div class="result">= ${result}</div>`;
+    item.onclick = () => { current = result; fresh = true; update(); };
+    historyList.prepend(item);
+  }
+
+  function clearHistory() { historyList.innerHTML = ''; }
+
+  // ปุ่มกด
+  function renderButtons() {
+    btnGrid.className = 'buttons ' + (mode === 'sci' ? 'sci-grid' : 'basic-grid');
+    btnGrid.innerHTML = '';
+
+    if (mode === 'sci') {
+      const sciBtns = [
+        ['sin','sci'], ['cos','sci'], ['tan','sci'], ['log','sci'], ['ln','sci'],
+        ['x²','sci'],  ['√','sci'],   ['1/x','sci'], ['π','sci'],  ['e','sci'],
+        ['AC','clear'], ['+/-','op'], ['%','op'], ['⌫','op'], ['÷','op'],
+        ['7',''], ['8',''], ['9',''], ['',''], ['×','op'],
+        ['4',''], ['5',''], ['6',''], ['',''], ['−','op'],
+        ['1',''], ['2',''], ['3',''], ['',''], ['+','op'],
+        ['0','zero'], ['.',''], ['=','eq'],
+      ];
+      sciBtns.forEach(([label, cls]) => {
+        if (label === '') return;
+        const b = document.createElement('button');
+        b.textContent = label;
+        if (cls) b.className = cls;
+        if (cls === 'zero') b.style.gridColumn = 'span 2';
+        b.onclick = () => handleBtn(label);
+        btnGrid.appendChild(b);
+      });
+    } else {
+      const basicBtns = [
+        ['AC','clear'], ['+/-','op'], ['%','op'], ['÷','op'],
+        ['7',''], ['8',''], ['9',''], ['×','op'],
+        ['4',''], ['5',''], ['6',''], ['−','op'],
+        ['1',''], ['2',''], ['3',''], ['+','op'],
+        ['0','zero'], ['.',''], ['=','eq'],
+      ];
+      basicBtns.forEach(([label, cls]) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        if (cls) b.className = cls;
+        if (cls === 'zero') b.style.gridColumn = 'span 2';
+        b.onclick = () => handleBtn(label);
+        btnGrid.appendChild(b);
+      });
+    }
+  }
+
+  function handleBtn(label) {
+    if ('0123456789'.includes(label)) input(label);
+    else if (label === '.') input('.');
+    else if (label === 'AC') clearAll();
+    else if (label === '+/-') toggleSign();
+    else if (label === '%') percent();
+    else if (label === '÷') setOp('/');
+    else if (label === '×') setOp('*');
+    else if (label === '−') setOp('-');
+    else if (label === '+') setOp('+');
+    else if (label === '=') calculate();
+    else if (label === '⌫') { current = current.length > 1 ? current.slice(0,-1) : '0'; update(); }
+    else if (label === 'sin') sciCalc('sin');
+    else if (label === 'cos') sciCalc('cos');
+    else if (label === 'tan') sciCalc('tan');
+    else if (label === 'log') sciCalc('log');
+    else if (label === 'ln') sciCalc('ln');
+    else if (label === 'x²') sciCalc('sq');
+    else if (label === '√') sciCalc('sqrt');
+    else if (label === '1/x') sciCalc('inv');
+    else if (label === 'π') sciCalc('pi');
+    else if (label === 'e') sciCalc('e');
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.querySelectorAll('.mode-btn').forEach((b,i) => {
+      b.classList.toggle('active', (i===0 && m==='basic') || (i===1 && m==='sci'));
+    });
+    renderButtons();
+  }
+
+  // คีย์บอร์ด
+  document.addEventListener('keydown', e => {
+    const map = {
+      '0':'0','1':'1','2':'2','3':'3','4':'4',
+      '5':'5','6':'6','7':'7','8':'8','9':'9',
+      '.':'.', 'Enter':'=', '=':'=',
+      '+':'+', '-':'−', '*':'×', '/':'÷',
+      'Backspace':'⌫', 'Escape':'AC', '%':'%'
+    };
+    if (map[e.key]) { e.preventDefault(); handleBtn(map[e.key]); }
+  });
+
+  renderButtons();
+</script>
+
+</body>
+</html>
